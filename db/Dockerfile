@@ -14,5 +14,4 @@ COPY . buzz
 
 WORKDIR buzz
 
-#EXPOSE 3306
 EXPOSE 5432
