@@ -33,8 +33,8 @@ def create_app():  # {{{
     :return: The flask app instance.
     :rtype: Flask
     """
-    _app = Flask(__name__, template_folder='templates')
-    _app.secret_key = 'yeetyeetskeetskeet'
+    _app = Flask(__name__)
+    _app.secret_key = 'yeetyeetskeetskeet' # This seems like a TODO, but I don't know what to do about it
     _app.logger = create_logger(_app)
     _app.logger.setLevel(logging.DEBUG)
 

@@ -10,7 +10,7 @@ class DictSchema(Schema):
     Schema that serializes into a dictionary. turns on strict validation by default.
     """
     def __init__(self, strict=True, **kwargs):
-        super(DictSchema, self).__init__(strict=strict, **kwargs)
+        super(DictSchema, self).__init__(**kwargs)
 
 
 class ObjectSchema(DictSchema):
