@@ -3,16 +3,16 @@
 set -e
 
 echo "Stopping containers..."
-docker kill poppinserver || true
+docker kill buzzserver || true
 
 echo "Deleting containers..."
-docker rm poppinserver || true
+docker rm buzzserver || true
 
 sleep 1
 
 echo "Starting server container..."
-docker run --env-file server/env.env -d -p 1221:80 --net poppin --name poppinserver poppinserver:latest
+docker run --env-file server/env.env -d -p 1221:80 --net buzz --name buzzserver buzzserver:latest
 set +x
 
-echo "To see logs of server, type 'docker logs -f poppinserver'"
+echo "To see logs of server, type 'docker logs -f buzzserver'"
 echo "View website at http://localhost:1221"

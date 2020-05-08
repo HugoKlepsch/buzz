@@ -4,7 +4,7 @@
 venv/
 *workspace.xml
 *misc.xml
-*poppin*.iml
+*buzz*.iml
 Session.vim
 modules.xml
 profiles_settings.xml

@@ -1,6 +1,6 @@
-# Poppin api
+# Buzz api
 
-Poppin API build in Python with Flask.
+Buzz API build in Python with Flask.
 
 ## Contents
 
@@ -38,17 +38,17 @@ To restart just the server instead of restarting the server and the db
 
 To check logs:
 
-    docker logs poppinserver
+    docker logs buzzserver
     or
-    docker logs poppindb
+    docker logs buzzdb
 
 If you want to access the db container from the server container, use the url
 
-    poppindb.poppin
+    buzzdb.buzz
 
 If you want to access the server container from the db container, use the url
 
-    poppinserver.poppin
+    buzzserver.buzz
 
 To install docker on Ubuntu:
 

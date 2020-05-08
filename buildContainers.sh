@@ -5,8 +5,8 @@ set -x
 
 echo "Building..."
 
-docker build -t poppindb:latest db/
+docker build -t buzzdb:latest db/
 
-docker build -t poppinserver:latest server/
+docker build -t buzzserver:latest server/
 
 echo "done"

@@ -42,7 +42,7 @@ def create_app():  # {{{
     db_host = os.environ.get('DBHOST', '127.0.0.1')
     db_port = int(os.environ.get('DBPORT', 5432))
     db_password = os.environ.get('DBPASS', 'notwaterloo')
-    db_database = 'poppindb'
+    db_database = 'buzzdb'
     db_string = 'postgresql://root:{password}@{host}:{port}/{database}'.format(
         password=db_password,
         host=db_host,
@@ -519,7 +519,7 @@ def hype_event(hype_data):
 @APP.route('/', methods=['GET'])
 def health_check():
     """Health check endpoint"""
-    return 'You know, for poppin'
+    return 'You know, for buzz'
 
 
 def main():
