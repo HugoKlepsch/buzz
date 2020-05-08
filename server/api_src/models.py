@@ -9,6 +9,10 @@ from api_src.db import DB
 from api_src.schema import JsonApiSchema, AuthenticatedMessageSchema
 
 
+# TODO
+# This file is retained as an example how to use the database and schema module.
+# Only the schema code is used for now.
+
 class Account(DB.Model):
     """Account database model"""
     __tablename__ = 'accounts'

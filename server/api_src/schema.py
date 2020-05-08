@@ -7,9 +7,9 @@ from marshmallow import Schema, post_load, fields
 
 class DictSchema(Schema):
     """
-    Schema that serializes into a dictionary. turns on strict validation by default.
+    Schema that serializes into a dictionary.
     """
-    def __init__(self, strict=True, **kwargs):
+    def __init__(self, **kwargs):
         super(DictSchema, self).__init__(**kwargs)
 
 
@@ -40,7 +40,7 @@ class AuthenticatedMessageSchema(DictSchema):
     """
     Schema for authenticated API requests
     """
-    device_key = fields.Str()
+    user_key = fields.Str()
 
 
 JSON_CT = {'Content-Type': 'application/json; charset=utf-8'}
