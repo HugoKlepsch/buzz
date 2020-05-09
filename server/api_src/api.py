@@ -7,7 +7,7 @@ import os
 import random
 import string
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from flask.logging import create_logger
 from webargs.flaskparser import use_args
 
@@ -26,7 +26,7 @@ def create_app():  # {{{
     :return: The flask app instance.
     :rtype: Flask
     """
-    _app = Flask(__name__)
+    _app = Flask(__name__, template_folder='../templates')
     _app.secret_key = 'yeetyeetskeetskeet' # This seems like a TODO, but I don't know what to do about it
     _app.logger = create_logger(_app)
     _app.logger.setLevel(logging.DEBUG)
@@ -341,6 +341,12 @@ def game_create(payload):
 def health_check():
     """Health check endpoint"""
     return 'You know, for buzz'
+
+
+@APP.route('/static/js/<path:file_path>', methods=['GET'])
+def static_file_router(file_path):
+    """Static file router"""
+    return send_from_directory('../static', file_path)
 
 
 @APP.route('/', methods=['GET'])
