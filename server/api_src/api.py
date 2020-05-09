@@ -173,7 +173,7 @@ def game_status_simple(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/clearbuzz', methods=['POST'])
 @use_args(SessionAuthenticatedMessageSchema())
-@IP_LIMITER.limit('5 per 1 seconds')
+@IP_LIMITER.limit('1 per 1 seconds')
 @authenticated()
 def game_clear_buzz(payload, game_ext_id):
     """
@@ -202,7 +202,7 @@ def game_clear_buzz(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/set_q_num', methods=['POST'])
 @use_args(SetQNumSchemaIn())
-@IP_LIMITER.limit('5 per 1 seconds')
+@IP_LIMITER.limit('1 per 1 seconds')
 @authenticated()
 def game_set_q_num(payload, game_ext_id):
     """
@@ -229,6 +229,36 @@ def game_set_q_num(payload, game_ext_id):
             return {'msg': 'Invalid question number'}, 400, JSON_CT
 
     return "Invalid game ID, go back and try again", 404
+
+
+@APP.route('/api/<string:game_ext_id>/buzz', methods=['POST'])
+@use_args(SessionAuthenticatedMessageSchema())
+@IP_LIMITER.limit('5 per 1 seconds')
+@authenticated()
+def game_buzz(payload, game_ext_id):
+    """
+    Buzzes in the current game state as the player authenticated with the session_key
+
+    :param dict payload: POST payload
+    :param str game_ext_id: 8 character game_id, Game.game_ext_id in model
+    :return: Game update status
+    :rtype: dict
+    """
+    game_ext_id = game_ext_id.upper()
+
+    if not is_authenticated(payload=payload, for_game_ext_id=game_ext_id):
+        return {'msg': 'Not authenticated'}, 401, JSON_CT
+
+    player = PlayerSession.query.filter_by(session_key=payload['session_key']).first()
+    if player:
+        player.buzz_time = datetime.datetime.utcnow()
+        DB.session.commit()
+        return {
+            'msg': 'Buzzed',
+            'buzz_time': str(player.buzz_time)
+        }, 200, JSON_CT
+
+    return {'msg': 'Invalid session_key'}, 400, JSON_CT
 
 
 @APP.route('/api/<string:game_ext_id>/join', methods=['POST'])
