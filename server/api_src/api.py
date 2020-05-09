@@ -157,15 +157,23 @@ def game_status_simple(payload, game_ext_id):
         players = PlayerSession.query.filter_by(game_id=game.id).all()
         players.sort(key=lambda player: (player.buzz_time if player.buzz_time
                                          else datetime.datetime(year=1980, month=1, day=1)))
+        player_list = []
+        buzz_index = 0
+        for player in players:
+            if player.buzz_time:
+                player_buzz_index = buzz_index
+                buzz_index += 1
+            else:
+                player_buzz_index = -1
+
+            player_list.append({
+                'username': player.username,
+                'buzz_order': player_buzz_index
+            })
+
         return {
             'q_num': game.q_num,
-            'player_list': [
-                {
-                    'username': player.username,
-                    'buzz_order': i if player.buzz_time else -1
-                }
-                for i, player in enumerate(players)
-            ]
+            'player_list': player_list
         }, 200, JSON_CT
 
     return "Invalid game ID, go back and try again", 404
@@ -251,8 +259,9 @@ def game_buzz(payload, game_ext_id):
 
     player = PlayerSession.query.filter_by(session_key=payload['session_key']).first()
     if player:
-        player.buzz_time = datetime.datetime.utcnow()
-        DB.session.commit()
+        if not player.buzz_time:
+            player.buzz_time = datetime.datetime.utcnow()
+            DB.session.commit()
         return {
             'msg': 'Buzzed',
             'buzz_time': str(player.buzz_time)
