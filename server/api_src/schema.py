@@ -15,7 +15,7 @@ class DictSchema(Schema):
 
 class ObjectSchema(DictSchema):
     """
-    Schema that serializes into a python object. Turns on strict validation by default.
+    Schema that serializes into a python object.
     _object_class should return the class to construct with the data. Each field will
     be passed to the constructor as kwargs.
     """
@@ -36,11 +36,11 @@ class JsonApiSchema(DictSchema):
     msg = fields.Str()
 
 
-class AuthenticatedMessageSchema(DictSchema):
+class SessionAuthenticatedMessageSchema(DictSchema):
     """
-    Schema for authenticated API requests
+    Schema for session authenticated API requests
     """
-    user_key = fields.Str()
+    session_key = fields.Str()
 
 
 JSON_CT = {'Content-Type': 'application/json; charset=utf-8'}
