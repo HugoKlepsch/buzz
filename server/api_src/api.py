@@ -7,7 +7,7 @@ import os
 import random
 import string
 
-from flask import Flask
+from flask import Flask, render_template
 from flask.logging import create_logger
 from webargs.flaskparser import use_args
 
@@ -128,6 +128,15 @@ def gen_session_key():
     :rtype: str
     """
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=64))
+
+
+def gen_game_ext_id():
+    """
+    Generate a new game_ext_id. 8 character string all caps.
+    :return: The new game_ext_id
+    :rtype: str
+    """
+    return ''.join(random.choices(string.ascii_uppercase, k=8))
 
 
 APP = create_app()
@@ -300,10 +309,44 @@ def game_join(payload, game_ext_id):
     return "Invalid game ID, go back and try again", 404
 
 
-@APP.route('/', methods=['GET'])
+@APP.route('/api/create', methods=['POST'])
+@use_args(PlayerJoinSchemaIn())
+@IP_LIMITER.limit('1 per 10 seconds')
+def game_create(payload):
+    """
+    Create a game session
+
+    :param dict payload: POST payload, must contain 'username'
+    :return: Game session_key and game_ext_id.
+    :rtype: dict
+    """
+    game = Game(game_ext_id=gen_game_ext_id())
+    DB.session.add(game)
+    DB.session.commit()
+
+    username = payload['username']
+
+    player = PlayerSession(username=username,
+                           session_key=gen_session_key(),
+                           game_id=game.id)
+    DB.session.add(player)
+    DB.session.commit()
+    return {
+        'session_key': player.session_key,
+        'game_ext_id': game.game_ext_id
+    }, 200, JSON_CT
+
+
+@APP.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     return 'You know, for buzz'
+
+
+@APP.route('/', methods=['GET'])
+def landing_page():
+    """Landing page"""
+    return render_template('landing_page.html')
 
 
 def main():
