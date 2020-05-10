@@ -7,7 +7,7 @@ import os
 import random
 import string
 
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, redirect, render_template, send_from_directory, url_for
 from flask.logging import create_logger
 from webargs.flaskparser import use_args
 
@@ -145,7 +145,7 @@ setup_database(APP)
 
 @APP.route('/api/<string:game_ext_id>', methods=['POST'])
 @use_args(SessionAuthenticatedMessageSchema())
-@IP_LIMITER.limit('5 per 1 seconds')
+@IP_LIMITER.limit('10 per 1 seconds')
 @authenticated()
 def game_status_simple(payload, game_ext_id):
     """
@@ -219,7 +219,7 @@ def game_clear_buzz(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/set_q_num', methods=['POST'])
 @use_args(SetQNumSchemaIn())
-@IP_LIMITER.limit('1 per 1 seconds')
+@IP_LIMITER.limit('5 per 1 seconds')
 @authenticated()
 def game_set_q_num(payload, game_ext_id):
     """
@@ -343,16 +343,29 @@ def health_check():
     return 'You know, for buzz'
 
 
-@APP.route('/static/js/<path:file_path>', methods=['GET'])
+@APP.route('/', methods=['GET'])
+def landing_page():
+    """Landing page"""
+    return render_template('landing_page.html')
+
+
+@APP.route('/file/<path:file_path>', methods=['GET'])
 def static_file_router(file_path):
     """Static file router"""
     return send_from_directory('../static', file_path)
 
 
-@APP.route('/', methods=['GET'])
-def landing_page():
-    """Landing page"""
-    return render_template('landing_page.html')
+@APP.route('/<string:game_ext_id>', methods=['GET'])
+def game_view_page(game_ext_id):
+    """
+    Game view page
+    :param str game_ext_id: The game_ext_id of the game, 8 characters.
+    :return: The rendered game view page.
+    :rtype: str
+    """
+    if len(game_ext_id) == 8:
+        return render_template('game_view.html', game_ext_id=game_ext_id)
+    return redirect(url_for('landing_page'))
 
 
 def main():
