@@ -11,7 +11,7 @@ echo "Creating docker network..."
 docker network create buzz
 
 echo "Starting db container..."
-docker run -d -p 5432:5432 --net buzz --name buzzdb buzzdb:latest
+docker run -d -p 5433:5432 --net buzz --name buzzdb buzzdb:latest
 
 echo "Starting server container..."
 docker run --env-file server/env.env -d -p 14532:80 --net buzz --name buzzserver buzzserver:latest
