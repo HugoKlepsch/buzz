@@ -14,10 +14,10 @@ echo "Starting db container..."
 docker run -d -p 5432:5432 --net buzz --name buzzdb buzzdb:latest
 
 echo "Starting server container..."
-docker run --env-file server/env.env -d -p 1221:80 --net buzz --name buzzserver buzzserver:latest
+docker run --env-file server/env.env -d -p 14532:80 --net buzz --name buzzserver buzzserver:latest
 set +x
 
 echo "To see logs of db, type 'docker logs -f buzzdb'"
 echo "To see logs of server, type 'docker logs -f buzzserver'"
-echo "View website at http://localhost:1221"
+echo "View website at http://localhost:14532"
 
