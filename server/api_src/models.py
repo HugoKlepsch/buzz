@@ -25,7 +25,7 @@ class PlayerSession(DB.Model):
     __tablename__ = 'playersession'
     id = DB.Column(DB.Integer, nullable=False, autoincrement=True, primary_key=True)
     username = DB.Column(DB.String(64), nullable=False)
-    session_key = DB.Column(DB.String(64), nullable=False)
+    session_key = DB.Column(DB.String(8), nullable=False)
     buzz_time = DB.Column(DB.DateTime, nullable=True)
     game_id = DB.Column(DB.Integer, DB.ForeignKey(Game.__tablename__ + '.id', ondelete='CASCADE'), nullable=False)
 

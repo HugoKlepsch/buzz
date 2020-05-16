@@ -123,11 +123,11 @@ def authenticated(for_game_ext_id=None):
 
 def gen_session_key():
     """
-    Generate a new session key. 64 character alpha-numeric string.
+    Generate a new session key. 8 character alpha-numeric string.
     :return: The new session key
     :rtype: str
     """
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=64))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
 
 def gen_game_ext_id():
