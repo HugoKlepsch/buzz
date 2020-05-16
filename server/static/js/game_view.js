@@ -7,12 +7,43 @@ var session_key = sessionStorage.getItem('session_key');
 var game_ext_id = sessionStorage.getItem('game_ext_id');
 var q_num = 0;
 
-if (session_key === null || game_ext_id === null) {
-  window.location.replace('/');
+if (game_ext_id === null) {
+  game_ext_id = window.location.pathname.substring(1);
+}
+
+if (session_key === null) {
+  var username = prompt("Enter your username", "");
+
+  if (username != null) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/' + game_ext_id + '/join', true);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.send(JSON.stringify({
+      'username': username
+    }))
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          resp = JSON.parse(xhr.responseText);
+          sessionStorage.setItem('session_key', resp['session_key']);
+          sessionStorage.setItem('game_ext_id', game_ext_id);
+          session_key = resp['session_key'];
+
+          window.location.replace('/' + game_ext_id);
+        } else {
+          alert('There was a problem with the request.');
+          window.location.replace('/');
+        }
+      }
+    }
+  } else {
+    window.location.replace('/');
+  }
 }
 
 setInterval(function () {
-  console.log('game view update trigger');
+  //console.log('game view update trigger');
 
   var xhr = new XMLHttpRequest();
   xhr.open('POST', '/api/' + game_ext_id, true);
@@ -45,7 +76,7 @@ setInterval(function () {
         player_list_table.replaceChild(new_tbody, player_list_tbody);
         player_list_tbody = new_tbody;
 
-        console.log('/api/' + game_ext_id + ' response: ' + JSON.stringify(resp));
+        //console.log('/api/' + game_ext_id + ' response: ' + JSON.stringify(resp));
       } else if (xhr.status === 401) {
         window.location.replace('/');
       } else {
@@ -53,7 +84,7 @@ setInterval(function () {
       }
     }
   }
-}, 200);
+}, 666);
 
 function buzz() {
   var xhr = new XMLHttpRequest();
@@ -67,7 +98,7 @@ function buzz() {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         resp = JSON.parse(xhr.responseText);
-        console.log('/api/' + game_ext_id + '/buzz response: ' + JSON.stringify(resp));
+        //console.log('/api/' + game_ext_id + '/buzz response: ' + JSON.stringify(resp));
       } else {
         console.log('Buzz failed: ' + xhr.status);
       }
@@ -87,7 +118,7 @@ function clearbuzz() {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         resp = JSON.parse(xhr.responseText);
-        console.log('/api/' + game_ext_id + '/clearbuzz response: ' + JSON.stringify(resp));
+        //console.log('/api/' + game_ext_id + '/clearbuzz response: ' + JSON.stringify(resp));
       } else {
         console.log('Clearbuzz failed: ' + xhr.status);
       }
@@ -118,7 +149,7 @@ function set_q_num_call() {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200) {
         resp = JSON.parse(xhr.responseText);
-        console.log('/api/' + game_ext_id + '/set_q_num response: ' + JSON.stringify(resp));
+        //console.log('/api/' + game_ext_id + '/set_q_num response: ' + JSON.stringify(resp));
       } else {
         console.log('Set q num failed: ' + xhr.status);
       }
