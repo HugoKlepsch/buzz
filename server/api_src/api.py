@@ -145,7 +145,7 @@ setup_database(APP)
 
 @APP.route('/api/<string:game_ext_id>', methods=['POST'])
 @use_args(SessionAuthenticatedMessageSchema())
-@IP_LIMITER.limit('10 per 1 seconds')
+#@IP_LIMITER.limit('10 per 1 seconds')
 @authenticated()
 def game_status_simple(payload, game_ext_id):
     """
@@ -190,7 +190,7 @@ def game_status_simple(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/clearbuzz', methods=['POST'])
 @use_args(SessionAuthenticatedMessageSchema())
-@IP_LIMITER.limit('1 per 1 seconds')
+#@IP_LIMITER.limit('1 per 1 seconds')
 @authenticated()
 def game_clear_buzz(payload, game_ext_id):
     """
@@ -219,7 +219,7 @@ def game_clear_buzz(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/set_q_num', methods=['POST'])
 @use_args(SetQNumSchemaIn())
-@IP_LIMITER.limit('5 per 1 seconds')
+#@IP_LIMITER.limit('5 per 1 seconds')
 @authenticated()
 def game_set_q_num(payload, game_ext_id):
     """
@@ -250,7 +250,7 @@ def game_set_q_num(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/buzz', methods=['POST'])
 @use_args(SessionAuthenticatedMessageSchema())
-@IP_LIMITER.limit('5 per 1 seconds')
+#@IP_LIMITER.limit('5 per 1 seconds')
 @authenticated()
 def game_buzz(payload, game_ext_id):
     """
@@ -281,7 +281,7 @@ def game_buzz(payload, game_ext_id):
 
 @APP.route('/api/<string:game_ext_id>/join', methods=['POST'])
 @use_args(PlayerJoinSchemaIn())
-@IP_LIMITER.limit('1 per 1 seconds')
+#@IP_LIMITER.limit('1 per 1 seconds')
 def game_join(payload, game_ext_id):
     """
     Join a game session denoted by game_id.
@@ -311,7 +311,7 @@ def game_join(payload, game_ext_id):
 
 @APP.route('/api/create', methods=['POST'])
 @use_args(PlayerJoinSchemaIn())
-@IP_LIMITER.limit('1 per 10 seconds')
+#@IP_LIMITER.limit('1 per 10 seconds')
 def game_create(payload):
     """
     Create a game session
