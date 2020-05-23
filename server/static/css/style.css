@@ -9,7 +9,62 @@ input {
   display: block;
 }
 
+p {
+  text-align: center;
+}
+
+span > p {
+  display: inline;
+}
+
+table {
+  border-collapse: collapse;
+  margin-bottom: 1em;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #ddd;
+  padding 8px;
+}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+  padding-bottom: 12px;
+  padding-top: 12px;
+  text-align: left;
+}
+
 /* Classes */
+.arrow {
+  display: inline;
+}
+
+.btn-bad {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  border-radius: 3px;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+}
+
+.btn-good {
+  background-color: #f44336; /* Red */
+  border: none;
+  border-radius: 3px;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+}
+
 .form-input {
   border-color: grey;
   border-radius: 3px;
@@ -17,4 +72,5 @@ input {
   border-width: medium;
   display: inline-block;
   margin-bottom: 1em;
+  padding: 1em;
 }
