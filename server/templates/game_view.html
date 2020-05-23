@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <title>Buzz</title>
-</head>
-<body>
+    <title>Buzz Game</title>
+    <link rel="stylesheet" type="text/css" href="/file/css/style.css">
+  </head>
+  <body>
 
-<h1>Trivia game</h1>
-<div class="form-input">
-    <h6>Question number: </h6>
-    <p id="q_num"></p>
-    <table id="player_list">
-        <thead>
-        <tr>
-            <th colspan="2">Players</th>
-        </tr>
-        <tr>
-            <th>Players name</th>
-            <th>Buzz order</th>
-        </tr>
-        </thead>
-        <tbody id="player_list_tbody">
-        <tr>
-        </tr>
-        </tbody>
-    </table>
+    <h1>Buzz Room</h1>
 
-    <button type="submit" class="btn btn-primary" onclick="buzz();">Buzz</button>
-    <button type="submit" class="btn btn-primary" onclick="clearbuzz();">Clear buzzes</button>
-    <button type="submit" class="btn btn-primary" onclick="q_num_up();">Question number up</button>
-    <button type="submit" class="btn btn-primary" onclick="q_num_down();">Question number down</button>
-</div>
-<script src="/file/js/game_view.js"></script>
-</body>
+    <div class="form-input">
+      <p>Question</p>
+      <span>
+        <button type="submit" class="arrow" onclick="q_num_down();">&lt;</button>
+        <p id="q_num"></p>
+        <button type="submit" class="arrow" onclick="q_num_up();">&gt;</button>
+      </span>
+    </div>
+
+
+    <div>
+      <div class="form-input">
+        <table id="player_list">
+            <tr>
+              <th>Name</th>
+              <th>Buzz Order</th>
+            </tr>
+          <tbody id="player_list_tbody">
+            <tr>
+            </tr>
+          </tbody>
+        </table>
+
+        <button type="submit" class="btn-good" onclick="buzz();">Buzz</button>
+        <button type="submit" class="btn-bad" onclick="clearbuzz();">Clear buzzes</button>
+      </div>
+    </div>
+    <script src="/file/js/game_view.js"></script>
+  </body>
 </html>
