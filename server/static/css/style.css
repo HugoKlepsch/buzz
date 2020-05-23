@@ -1,0 +1,20 @@
+/* style.css */
+
+/* Elements */
+button {
+  display: block;
+}
+
+input {
+  display: block;
+}
+
+/* Classes */
+.form-input {
+  border-color: grey;
+  border-radius: 3px;
+  border-style: solid;
+  border-width: medium;
+  display: inline-block;
+  margin-bottom: 1em;
+}

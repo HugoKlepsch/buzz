@@ -1,5 +1,6 @@
 var username_field = document.getElementById('username')
 var game_ext_id_field = document.getElementById('game_ext_id')
+var username_create = document.getElementById('username_create')
 
 function join() {
   console.log('join function called');
@@ -33,7 +34,7 @@ function join() {
 
 function create() {
   console.log('create function called')
-  username = username_field.value;
+  username = username_create.value;
   console.log('username: ' + username);
 
   var xhr = new XMLHttpRequest();
