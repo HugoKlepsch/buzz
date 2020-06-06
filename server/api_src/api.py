@@ -77,6 +77,28 @@ def setup_database(_app):  # {{{
 # }}}
 
 
+def is_game_creator(payload, for_game_ext_id=None):
+    """
+    Check if the requester is the game creator
+
+    :param dict payload: Payload loaded from request. Key 'session_key' should exist
+    :param str for_game_ext_id: game_ext_id the session key must match
+    :return: Is the requester authenticated
+    :rtype: bool
+    """
+    if 'session_key' in payload:
+        session_key = payload['session_key']
+        player = PlayerSession.query.filter_by(session_key=session_key).first()
+        if player is not None:
+            if for_game_ext_id:
+                game = Game.query.filter_by(id=player.game_id).first()
+                if game:
+                    return game.game_ext_id == for_game_ext_id and player.is_creator
+            else:
+                return player.is_creator
+    return False
+
+
 def is_authenticated(payload, for_game_ext_id=None):
     """
     Check if the requester is authenticated
@@ -206,6 +228,9 @@ def game_clear_buzz(payload, game_ext_id):
     if not is_authenticated(payload=payload, for_game_ext_id=game_ext_id):
         return {'msg': 'Not authenticated'}, 401, JSON_CT
 
+    if not is_game_creator(payload=payload, for_game_ext_id=game_ext_id):
+        return {'msg': 'Not authenticated'}, 401, JSON_CT
+
     game = Game.query.filter_by(game_ext_id=game_ext_id).first()
     if game:
         players = PlayerSession.query.filter_by(game_id=game.id).all()
@@ -233,6 +258,9 @@ def game_set_q_num(payload, game_ext_id):
     game_ext_id = game_ext_id.upper()
 
     if not is_authenticated(payload=payload, for_game_ext_id=game_ext_id):
+        return {'msg': 'Not authenticated'}, 401, JSON_CT
+
+    if not is_game_creator(payload=payload, for_game_ext_id=game_ext_id):
         return {'msg': 'Not authenticated'}, 401, JSON_CT
 
     game = Game.query.filter_by(game_ext_id=game_ext_id).first()
@@ -328,7 +356,8 @@ def game_create(payload):
 
     player = PlayerSession(username=username,
                            session_key=gen_session_key(),
-                           game_id=game.id)
+                           game_id=game.id,
+                           is_creator=True)
     DB.session.add(player)
     DB.session.commit()
     return {
