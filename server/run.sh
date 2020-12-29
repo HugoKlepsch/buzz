@@ -17,7 +17,7 @@ echo "Database ready"
 
 . /venv/bin/activate
 cd server/
-python -m api_src.api
+python -m api_src.api --port $CONTAINERPORT
 
 echo "Job failed, sleeping..."
 while true; do

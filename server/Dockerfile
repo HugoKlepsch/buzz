@@ -23,7 +23,7 @@ COPY . ./
 
 RUN ./build.sh
 
-EXPOSE 80
+EXPOSE 14532
 
 WORKDIR /
 

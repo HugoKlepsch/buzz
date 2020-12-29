@@ -1,0 +1,32 @@
+version: '3'
+
+networks:
+  reverse-proxy_reverse-proxy:
+    external: true
+  buzz:
+    driver: bridge
+
+services:
+  db:
+    container_name: buzzdb
+    hostname: buzzdb
+    image: buzzdb:latest
+    networks:
+      - buzz
+    ports:
+      - 5433:5432
+
+  server:
+    container_name: buzzserver
+    hostname: buzzserver
+    image: buzzserver:latest
+    networks:
+      - buzz
+      - reverse-proxy_reverse-proxy
+    ports:
+      - 14532:14532
+    environment:
+      - DBHOST=buzzdb.buzz_buzz
+      - DBPORT=5432
+      - DBPASS=notwaterloo
+      - CONTAINERPORT=14532
