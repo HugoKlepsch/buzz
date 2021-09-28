@@ -9,9 +9,8 @@ echo "Creating systemd service... /etc/systemd/system/${SERVICENAME}.service"
 cat >$SERVICENAME.service <<EOF
 [Unit]
 Description=$SERVICENAME
-Requires=docker.service
-After=docker.service
-Wants=reverse-proxy.service
+Requires=docker.service reverse-proxy-network.service
+After=docker.service reverse-proxy-network.service
 
 [Service]
 Restart=always
