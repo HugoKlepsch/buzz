@@ -1,5 +1,3 @@
-version: '3'
-
 networks:
   reverse-proxy-network_reverse-proxy-network:
     external: true

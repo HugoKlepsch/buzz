@@ -9,11 +9,11 @@ User=root
 Group=docker
 WorkingDirectory=/home/hugo/buzz
 # Shutdown container (if running) when unit is started
-ExecStartPre=/usr/bin/docker-compose -f docker-compose.yaml down
+ExecStartPre=/usr/bin/docker compose -f docker-compose.yaml down
 # Start container when unit is started
-ExecStart=/usr/bin/docker-compose -f docker-compose.yaml up
+ExecStart=/usr/bin/docker compose -f docker-compose.yaml up
 # Stop container when unit is stopped
-ExecStop=/usr/bin/docker-compose -f docker-compose.yaml down
+ExecStop=/usr/bin/docker compose -f docker-compose.yaml down
 
 [Install]
 WantedBy=multi-user.target
