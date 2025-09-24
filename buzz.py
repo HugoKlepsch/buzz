@@ -47,11 +47,58 @@ GAMES = {
 }
 
 
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+def template_landing_page():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Buzz Lobby</title>
+        <style>
+            body {
+                Font-family: sans-serif;
+            }
+            input, button {
+                margin: 0.25em auto
+            }
+            form {
+                border-color: grey;
+                border-radius: 3px;
+                border-style: solid;
+                border-width: medium;
+                display: inline-block;
+                margin-bottom: 1em;
+                padding: 1em;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Buzz Lobby</h1>
+        <form action="/join" method="POST">
+            <h2>Join Game</h2>
+            <label for="username">Username:</label>
+            <input id="username" type="text" name="username" placeholder="Username" required pattern="[^\\s].{1,30}" autofocus />
+            <br>
+            <label for="game_id">Game ID:</label>
+            <input id="game_id" type="text" name="game_id" placeholder="Game ID" required pattern="[a-zA-Z]{8}"/>
+            <br>
+            <input type="submit" value="Join Game" />
+        </form>
+        <br>
+        <form action="/create" method="POST">
+            <h2>Create Game</h2>
+            <label for="username_create">Username:</label>
+            <input id="username_create" type="text" name="username" placeholder="Username" required pattern="[^\\s].{1,30}" autofocus />
+            <br>
+            <input type="submit" value="Create Game" />
+        </form>
+    </body>
+    """
+
+
+class BuzzAPI(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
-            # TODO landing page
-            return self.send_html(200, "Hello World!")
+            return self.send_html(200, template_landing_page())
         elif self.path.startswith('/a/s/'):
             # This is the game status api - like /a/s/BASEMENT
             # extract game ID from path
@@ -74,7 +121,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 return self.send_json(404, json.dumps({'msg': 'Game not found'}))
         elif self.path.startswith('/g/'):
             # This is a game page - like /g/BASEMENT
-            # TODO
+            # TODO game page
             return self.send_html(200, "Game page")
 
         else:
@@ -206,6 +253,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             status['q'] = payload['q']
             GAMES[game_id] = status
             return self.send_json(200, json.dumps({'msg': 'Question number set to {q_num}'.format(q_num=status['q'])}))
+        else:
+            return self.send_html(404, "Not found")
 
     def log_message(self, format, *args):
         # Override to customize logging or suppress it
@@ -239,7 +288,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def run_server(port=8080):
     server_address = ('', port)
-    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)  # type: ignore
+    httpd = HTTPServer(server_address, BuzzAPI)  # type: ignore
 
     print(f"Starting server on port {port}...")
     print(f"Visit http://localhost:{port}/ to see 'Hello World'")
