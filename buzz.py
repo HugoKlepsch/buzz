@@ -4,15 +4,11 @@
 Buzz server
 Server code assumes that there is a single thread.
 '''
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import random
 import string
-from http.server import HTTPServer, BaseHTTPRequestHandler
-
-
-def is_authenticated(payload, for_game_ext_id=None):
-    # TODO
-    return True
+from urllib.parse import parse_qs
 
 
 def gen_key():
@@ -86,8 +82,38 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         global GAMES
         if self.path.startswith('/create'):
-            # TODO create game, redirect, send 'k'
-            return self.send_html(200, "Game created")
+            # This is the game creation api - like /create
+
+            # Parse form data to get username
+            content_length = int(self.headers['Content-Length'])
+            form_data = self.rfile.read(content_length).decode('utf-8')
+            form_data = parse_qs(form_data)
+            try:
+                username = form_data.get('username', [None])[0]
+            except IndexError:
+                username = None
+            if not username or not username.strip():
+                return self.send_html(400, "Missing username")
+            username = username.strip()
+
+            game_id = gen_key()
+            GAMES[game_id] = {
+                'q': 1,
+                'ps': {},
+                'b_ord': [],
+            }
+            player_key = gen_key()
+            player = {
+                'username': username,
+                'is_creator': True,
+            }
+            GAMES[game_id]['ps'][player_key] = player
+
+            # Send redirect response with cookie
+            self.send_response(302)
+            self.send_header('Location', f'/g/{game_id}')
+            self.send_header('Set-Cookie', f'k={player_key}; Path=/')
+            self.end_headers()
         elif self.path.startswith('/a/b/'):
             # This is the buzz api - like /a/b/BASEMENT
             # extract game ID from path
@@ -139,7 +165,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
 def run_server(port=8080):
     server_address = ('', port)
-    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)  # type: ignore
 
     print(f"Starting server on port {port}...")
     print(f"Visit http://localhost:{port}/ to see 'Hello World'")
