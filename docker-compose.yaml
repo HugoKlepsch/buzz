@@ -1,8 +1,7 @@
 networks:
-  reverse-proxy-network_reverse-proxy-network:
+  reverse-proxy-network:
     external: true
   buzz:
-    driver: bridge
 
 services:
   db:
@@ -20,7 +19,7 @@ services:
     image: buzzserver:latest
     networks:
       - buzz
-      - reverse-proxy-network_reverse-proxy-network
+      - reverse-proxy-network
     ports:
       - 14532:14532
     environment:
