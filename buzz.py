@@ -185,6 +185,27 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             status['b_ord'] = []
             GAMES[game_id] = status
             return self.send_json(200, json.dumps({'msg': 'Buzzes cleared'}))
+        elif self.path.startswith('/a/q/'):
+            # This is the set q_num api - like /a/q/BASEMENT
+            # extract game ID from path
+            game_id = self.path.split('/')[3]
+            if game_id not in GAMES:
+                return self.send_json(404, json.dumps({'msg': 'Game not found'}))
+            status = GAMES[game_id]
+            # extract session key from payload
+            payload = self.json_payload()
+            if not payload or 'k' not in payload:
+                return self.send_json(400, json.dumps({'msg': 'Invalid JSON payload'}))
+            session_key = payload['k']
+            if session_key not in status['ps']:
+                return self.send_json(400, json.dumps({'msg': 'Invalid session key'}))
+            if not status['ps'][session_key]['is_creator']:
+                return self.send_json(401, json.dumps({'msg': 'Not authorized'}))
+            if 'q' not in payload:
+                return self.send_json(400, json.dumps({'msg': 'Invalid JSON payload'}))
+            status['q'] = payload['q']
+            GAMES[game_id] = status
+            return self.send_json(200, json.dumps({'msg': 'Question number set to {q_num}'.format(q_num=status['q'])}))
 
     def log_message(self, format, *args):
         # Override to customize logging or suppress it
