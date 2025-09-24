@@ -50,6 +50,7 @@ GAMES = {
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
+            # TODO landing page
             return self.send_html(200, "Hello World!")
         elif self.path.startswith('/a/s/'):
             # This is the game status api - like /a/s/BASEMENT
@@ -114,6 +115,39 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.send_header('Location', f'/g/{game_id}')
             self.send_header('Set-Cookie', f'k={player_key}; Path=/')
             self.end_headers()
+        elif self.path.startswith('/join'):
+            # This is the game join api - like /join
+
+            # Parse form data to get username and game ID
+            content_length = int(self.headers['Content-Length'])
+            form_data = self.rfile.read(content_length).decode('utf-8')
+            form_data = parse_qs(form_data)
+            try:
+                username = form_data.get('username', [None])[0]
+            except IndexError:
+                username = None
+            if not username or not username.strip():
+                return self.send_html(400, "Missing username")
+            username = username.strip()
+            try:
+                game_id = form_data.get('game_id', [None])[0]
+            except IndexError:
+                game_id = None
+            if not game_id or game_id not in GAMES:
+                return self.send_html(400, "Missing game ID")
+
+            player_key = gen_key()
+            player = {
+                'username': username,
+                'is_creator': False,
+            }
+            GAMES[game_id]['ps'][player_key] = player
+
+            # Send redirect response with cookie
+            self.send_response(302)
+            self.send_header('Location', f'/g/{game_id}')
+            self.send_header('Set-Cookie', f'k={player_key}; Path=/')
+            self.end_headers()
         elif self.path.startswith('/a/b/'):
             # This is the buzz api - like /a/b/BASEMENT
             # extract game ID from path
@@ -132,6 +166,25 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 status['b_ord'].append(session_key)
             GAMES[game_id] = status
             return self.send_json(200, json.dumps({'msg': 'Buzzed'}))
+        elif self.path.startswith('/a/c/'):
+            # This is the buzz clear api - like /a/c/BASEMENT
+            # extract game ID from path
+            game_id = self.path.split('/')[3]
+            if game_id not in GAMES:
+                return self.send_json(404, json.dumps({'msg': 'Game not found'}))
+            status = GAMES[game_id]
+            # extract session key from payload
+            payload = self.json_payload()
+            if not payload or 'k' not in payload:
+                return self.send_json(400, json.dumps({'msg': 'Invalid JSON payload'}))
+            session_key = payload['k']
+            if session_key not in status['ps']:
+                return self.send_json(400, json.dumps({'msg': 'Invalid session key'}))
+            if not status['ps'][session_key]['is_creator']:
+                return self.send_json(401, json.dumps({'msg': 'Not authorized'}))
+            status['b_ord'] = []
+            GAMES[game_id] = status
+            return self.send_json(200, json.dumps({'msg': 'Buzzes cleared'}))
 
     def log_message(self, format, *args):
         # Override to customize logging or suppress it
