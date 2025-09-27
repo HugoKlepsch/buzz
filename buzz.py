@@ -18,7 +18,10 @@ def gen_key():
     :return: The new key
     :rtype: str
     """
-    return ''.join(random.choices(string.ascii_uppercase, k=8))
+    return ''.join(random.choices(string.ascii_uppercase, k=6))
+
+def normalize_game_id(game_id):
+    return game_id.upper() if game_id else None
 
 
 # Stores game data
@@ -80,7 +83,7 @@ def template_landing_page():
             <input id="username" type="text" name="username" placeholder="Username" required pattern="[^\\s].{1,30}" autofocus />
             <br>
             <label for="game_id">Game ID:</label>
-            <input id="game_id" type="text" name="game_id" placeholder="Game ID" required pattern="[a-zA-Z]{8}"/>
+            <input id="game_id" type="text" name="game_id" placeholder="Game ID" required pattern="[a-zA-Z]+"/>
             <br>
             <input type="submit" value="Join Game" />
         </form>
@@ -289,6 +292,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             # This is the game status api - like /a/s/BASEMENT
             # extract game ID from path
             game_id = self.path.split('/')[3]
+            game_id = normalize_game_id(game_id)
             if game_id not in GAMES:
                 return self.send_json(404, json.dumps({'msg': 'Game not found'}))
             status = GAMES[game_id]
@@ -308,6 +312,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             # This is a game page - like /g/BASEMENT
             # TODO game page
             game_id = self.path.split('/')[2]
+            game_id = normalize_game_id(game_id)
             if game_id not in GAMES:
                 self.send_response(302)
                 self.send_header('Location', f'/?{urlencode({"msg": "Game not found"})}')
@@ -379,6 +384,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             username = username.strip()
             try:
                 game_id = form_data.get('game_id', [None])[0]
+                game_id = normalize_game_id(game_id)
             except IndexError:
                 game_id = None
             if not game_id or game_id not in GAMES:
@@ -406,6 +412,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             # This is the buzz api - like /a/b/BASEMENT
             # extract game ID from path
             game_id = self.path.split('/')[3]
+            game_id = normalize_game_id(game_id)
             if game_id not in GAMES:
                 return self.send_json(404, json.dumps({'msg': 'Game not found'}))
             status = GAMES[game_id]
@@ -424,6 +431,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             # This is the buzz clear api - like /a/c/BASEMENT
             # extract game ID from path
             game_id = self.path.split('/')[3]
+            game_id = normalize_game_id(game_id)
             if game_id not in GAMES:
                 return self.send_json(404, json.dumps({'msg': 'Game not found'}))
             status = GAMES[game_id]
@@ -443,6 +451,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             # This is the set q_num api - like /a/q/BASEMENT
             # extract game ID from path
             game_id = self.path.split('/')[3]
+            game_id = normalize_game_id(game_id)
             if game_id not in GAMES:
                 return self.send_json(404, json.dumps({'msg': 'Game not found'}))
             status = GAMES[game_id]
