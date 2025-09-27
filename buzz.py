@@ -8,7 +8,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import random
 import string
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlencode
 
 
 def gen_key():
@@ -60,20 +60,20 @@ def template_landing_page():
             input, button {
                 margin: 0.25em auto
             }
-            form {
+            .section {
                 border-color: grey;
                 border-radius: 3px;
                 border-style: solid;
                 border-width: medium;
                 display: inline-block;
-                margin-bottom: 1em;
-                padding: 1em;
+                margin: 1em auto;
+                padding: 0 1em 1em;
             }
         </style>
     </head>
     <body>
         <h1>Buzz Lobby</h1>
-        <form action="/join" method="POST">
+        <form class="section" action="/join" method="POST">
             <h2>Join Game</h2>
             <label for="username">Username:</label>
             <input id="username" type="text" name="username" placeholder="Username" required pattern="[^\\s].{1,30}" autofocus />
@@ -84,13 +84,185 @@ def template_landing_page():
             <input type="submit" value="Join Game" />
         </form>
         <br>
-        <form action="/create" method="POST">
+        <form class="section" action="/create" method="POST">
             <h2>Create Game</h2>
             <label for="username_create">Username:</label>
             <input id="username_create" type="text" name="username" placeholder="Username" required pattern="[^\\s].{1,30}" autofocus />
             <br>
             <input type="submit" value="Create Game" />
         </form>
+    </body>
+    """
+
+
+def template_game_page(status, player_key):
+    is_creator = status['ps'][player_key]['is_creator'] if player_key in status['ps'] else False
+    create_button_html = '<button onclick="clearBuzzes()">Clear Buzzes</button>' if is_creator else ""
+    minus_q_button_html = '<button onclick="changeQuestion(-1)">-</button>' if is_creator else ""
+    plus_q_button_html = '<button onclick="changeQuestion(1)">+</button>' if is_creator else ""
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Buzz Game</title>
+        <style>
+            body {{
+                Font-family: sans-serif;
+                max-width: 600px;
+            }}
+            input, button {{
+                margin: 0.25em auto;
+                padding: 1em;
+                font-size: 1.2em;
+            }}
+            .section {{
+                border-color: grey;
+                border-radius: 3px;
+                border-style: solid;
+                border-width: medium;
+                display: inline-block;
+                margin: 1em auto;
+                padding: 0 1em 1em;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Buzz Game</h1>
+        <div class="section">
+            <h3>Question number</h3>
+            <div>
+                {minus_q_button_html}
+                <span id="questionNumber">1</span>
+                {plus_q_button_html}
+            </div>
+        </div>
+        <br>
+        <button onclick="buzz()">Buzz</button>
+        {create_button_html}
+        <br>
+        <div class="section">
+            <h3>Players</h3>
+            <div id="playersList" class="loading">Loading players...</div>
+        </div>
+
+        <div class="section">
+            <h3>Buzz Order</h3>
+            <div id="buzzOrder" class="loading">No buzzes yet...</div>
+        </div>
+        <script>
+            // Get Game ID from URL
+            let gameID = null;
+            const path = window.location.pathname;
+            const segments = path.split('/');
+            if (segments.length >= 3 && segments[1] === 'g') {{
+              gameID = segments[2];
+            }}
+            
+            // Get player key from cookie if available
+            // If not available, post form to /join to get player key
+            let playerKey = null;
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {{
+                if (cookie.includes('k=')) {{
+                    playerKey = cookie.split('=')[1];
+                    break;
+                }}
+            }}
+            if (!playerKey) {{
+                let username = prompt('Enter your username');
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/join';
+                form.style.display = 'none';
+                let userIn = document.createElement('input');
+                userIn.type = 'hidden';
+                userIn.name = 'username';
+                userIn.value = username;
+                form.appendChild(userIn);
+                let gameIDIn = document.createElement('input');
+                gameIDIn.type = 'hidden';
+                gameIDIn.name = 'game_id';
+                gameIDIn.value = gameID;
+                form.appendChild(gameIDIn);
+                document.body.appendChild(form);
+                form.submit();
+            }}
+            
+            function changeQuestion(delta) {{
+                var q = document.getElementById("questionNumber");
+                q.innerHTML = String(Number(q.innerHTML) + delta);
+                fetch('/a/q/' + gameID, {{
+                    method: 'POST',
+                    headers: {{
+                        'Content-Type': 'application/json'
+                    }},
+                    body: JSON.stringify({{
+                        k: playerKey,
+                        q: Number(q.innerHTML)
+                    }})
+                }});
+                updateStatus();
+            }}
+            function buzz() {{
+                fetch('/a/b/' + gameID, {{
+                    method: 'POST',
+                    headers: {{
+                        'Content-Type': 'application/json'
+                    }},
+                    body: JSON.stringify({{
+                        k: playerKey
+                    }})
+                }});
+                updateStatus();
+            }}
+            function clearBuzzes() {{
+                fetch('/a/c/' + gameID, {{
+                    method: 'POST',
+                    headers: {{
+                        'Content-Type': 'application/json'
+                    }},
+                    body: JSON.stringify({{
+                        k: playerKey
+                    }})
+                }});
+                updateStatus();
+            }}
+            var status = null;
+            function updateStatus() {{
+                fetch('/a/s/' + gameID)
+                    .then(response => response.json())
+                    .then(data => updateDisplay(data));
+            }}
+            function updateDisplay(data) {{
+                document.getElementById("questionNumber").innerHTML = data.q;
+                
+                var playerList = "";
+                var buzzOrder = "";
+                
+                data.p.sort((a, b) => a.b_o - b.b_o);
+                
+                data.p.forEach(function(player) {{
+                    var playerName = player.u;
+                    if (player.c) playerName += " (Host)";
+                    if (player.b_o >= 0) {{
+                        playerList += `<div style="background-color: lightblue">`;
+                    }} else {{
+                        playerList += `<div>`;
+                    }}
+                    playerList += playerName;
+                    playerList += "</div>";
+                    
+                    if (player.b_o >= 0) {{
+                        buzzOrder += (player.b_o + 1) + ". " + player.u + "<br>";
+                    }}
+                }});
+                
+                document.getElementById("playersList").innerHTML = playerList;
+                document.getElementById("buzzOrder").innerHTML = buzzOrder || "No buzzes yet...";
+            }}
+            updateStatus();
+            setInterval(updateStatus, 1000);
+        </script>
     </body>
     """
 
@@ -103,26 +275,39 @@ class BuzzAPI(BaseHTTPRequestHandler):
             # This is the game status api - like /a/s/BASEMENT
             # extract game ID from path
             game_id = self.path.split('/')[3]
-            if game_id in GAMES:
-                status = GAMES[game_id]
-                send_status = {
-                    'q': status['q'],
-                    'p': [
-                        {
-                            'u': v['username'],
-                            'c': v['is_creator'],
-                            'b_o': status['b_ord'].index(k) if k in status['b_ord'] else -1,
-                        }
-                        for k, v in status['ps'].items()
-                    ]
-                }
-                return self.send_json(200, json.dumps(send_status))
-            else:
+            if game_id not in GAMES:
                 return self.send_json(404, json.dumps({'msg': 'Game not found'}))
+            status = GAMES[game_id]
+            send_status = {
+                'q': status['q'],
+                'p': [
+                    {
+                        'u': v['username'],
+                        'c': v['is_creator'],
+                        'b_o': status['b_ord'].index(k) if k in status['b_ord'] else -1,
+                    }
+                    for k, v in status['ps'].items()
+                ]
+            }
+            return self.send_json(200, json.dumps(send_status))
         elif self.path.startswith('/g/'):
             # This is a game page - like /g/BASEMENT
             # TODO game page
-            return self.send_html(200, "Game page")
+            game_id = self.path.split('/')[2]
+            if game_id not in GAMES:
+                self.send_response(302)
+                self.send_header('Location', f'/?{urlencode({"msg": "Game not found"})}')
+                self.end_headers()
+                return
+            status = GAMES[game_id]
+            # Get player key from cookie
+            player_key = None
+            cookies = self.headers.get('Cookie', '').split(';')
+            for cookie in cookies:
+                if cookie.startswith('k='):
+                    player_key = cookie.split('=')[1]
+                    break
+            return self.send_html(200, template_game_page(status, player_key))
 
         else:
             return self.send_html(404, "Not found")
@@ -162,6 +347,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             self.send_header('Location', f'/g/{game_id}')
             self.send_header('Set-Cookie', f'k={player_key}; Path=/')
             self.end_headers()
+            return
         elif self.path.startswith('/join'):
             # This is the game join api - like /join
 
@@ -182,6 +368,11 @@ class BuzzAPI(BaseHTTPRequestHandler):
                 game_id = None
             if not game_id or game_id not in GAMES:
                 return self.send_html(400, "Missing game ID")
+            if any(player['username'] == username for player in GAMES[game_id]['ps'].values()):
+                self.send_response(302)
+                self.send_header('Location', f'/?{urlencode({"msg": "Username already taken"})}')
+                self.end_headers()
+                return
 
             player_key = gen_key()
             player = {
@@ -195,6 +386,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
             self.send_header('Location', f'/g/{game_id}')
             self.send_header('Set-Cookie', f'k={player_key}; Path=/')
             self.end_headers()
+            return
         elif self.path.startswith('/a/b/'):
             # This is the buzz api - like /a/b/BASEMENT
             # extract game ID from path
