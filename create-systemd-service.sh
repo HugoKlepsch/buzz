@@ -2,7 +2,7 @@
 # Create a systemd service that autostarts & manages a docker-compose instance in the current directory
 # by Uli Köhler - https://techoverflow.net
 # Licensed as CC0 1.0 Universal
-SERVICENAME=$(basename $(pwd))
+SERVICENAME=$(basename "$(pwd)")
 
 echo "Creating systemd service... /etc/systemd/system/${SERVICENAME}.service"
 # Create systemd service file
@@ -20,7 +20,7 @@ WorkingDirectory=$(pwd)
 # Shutdown container (if running) when unit is started
 ExecStartPre=$(which docker) compose -f docker-compose.yaml down
 # Start container when unit is started
-ExecStart=$(which docker) compose -f docker-compose.yaml up
+ExecStart=$(which docker) compose -f docker-compose.yaml up --build --force-recreate
 # Stop container when unit is stopped
 ExecStop=$(which docker) compose -f docker-compose.yaml down
 
