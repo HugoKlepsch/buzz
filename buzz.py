@@ -267,7 +267,20 @@ def template_game_page(status, player_key):
     """
 
 
+def handle_connection_error(method):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return method(self, *args, **kwargs)
+        except ConnectionError:
+            self.log_message(
+                "Connection error occurred while processing %s request",
+                method.__name__,
+            )
+    return wrapper
+
+
 class BuzzAPI(BaseHTTPRequestHandler):
+    @handle_connection_error
     def do_GET(self):
         if self.path == '/':
             return self.send_html(200, template_landing_page())
@@ -312,6 +325,7 @@ class BuzzAPI(BaseHTTPRequestHandler):
         else:
             return self.send_html(404, "Not found")
 
+    @handle_connection_error
     def do_POST(self):
         global GAMES
         if self.path.startswith('/create'):
