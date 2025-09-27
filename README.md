@@ -1,5 +1,7 @@
 # Buzz
 
+[Public Buzz server](https://buzz.hugoklepsch.com)
+
 A lightweight HTTP server that hosts a simple multiplayer quiz buzzer. 
 Players can create or join a game, buzz in, and the host can manage question 
 numbers and clear buzz order.
