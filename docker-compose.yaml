@@ -1,7 +1,13 @@
+networks:
+  reverse-proxy-network:
+    external: true
+
 services:
   buzz:
     build: .
     container_name: buzz
+    networks:
+      - reverse-proxy-network
     ports:
       - "8080:8080"
     restart: unless-stopped
