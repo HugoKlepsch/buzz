@@ -9,6 +9,7 @@ import json
 import random
 import string
 from urllib.parse import parse_qs, urlencode
+import argparse
 
 
 def gen_key():
@@ -492,11 +493,12 @@ class BuzzAPI(BaseHTTPRequestHandler):
         # Send message body
         self.wfile.write(data.encode('utf-8'))
 
-def run_server(port=8080):
-    server_address = ('', port)
+def run_server(host: str = '', port: int = 8080):
+    server_address = (host, port)
     httpd = HTTPServer(server_address, BuzzAPI)  # type: ignore
 
-    print(f"Starting server on port {port}...")
+    bind_host_display = host if host else '0.0.0.0'
+    print(f"Starting server on {bind_host_display}:{port}...")
     print(f"Visit http://localhost:{port}/ to see 'Hello World'")
     print("Press Ctrl+C to stop the server")
 
@@ -508,4 +510,10 @@ def run_server(port=8080):
         httpd.server_close()
 
 if __name__ == '__main__':
-    run_server(8080)
+    parser = argparse.ArgumentParser(description='Run the Buzz server')
+    parser.add_argument('--host', default='',
+                        help='Host interface to bind to (default: empty string = all interfaces. "::" for all IPv6, "0.0.0.0" for all IPv4, "localhost" for only localhost)')
+    parser.add_argument('--port', type=int, default=8080,
+                        help='Port to listen on (default: 8080)')
+    args = parser.parse_args()
+    run_server(host=args.host, port=args.port)
