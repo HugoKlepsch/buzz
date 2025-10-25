@@ -272,6 +272,10 @@ def template_game_page(status, player_key):
 
 
 class BuzzAPI(BaseHTTPRequestHandler):
+    def setup(self):
+        super().setup()
+        self.request.settimeout(2)
+
     def do_GET(self):
         if self.path == '/':
             return self.send_html(200, template_landing_page())
