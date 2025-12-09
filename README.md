@@ -2,7 +2,7 @@
 
 [Public Buzz server](https://buzz.hugoklepsch.com)
 
-A lightweight HTTP server that hosts a simple multiplayer quiz buzzer. 
+A zero-dependency HTTP server that hosts a simple multiplayer quiz buzzer. 
 Players can create or join a game, buzz in, and the host can manage question 
 numbers and clear buzz order.
 
@@ -29,6 +29,7 @@ Notes:
 
 # Deployment
 
+* Zero dependencies! Runs with `python buzz.py`
 * Deployed with docker-compose. It can be as simple as `docker-compose up -d`,
 or if you want to deploy it as a systemd service, run `./create-systemd-service.sh`.
 * see [HugoKlepsch/reverse-proxy-network](http://github.com/HugoKlepsch/reverse-proxy-network) for files to create network.
